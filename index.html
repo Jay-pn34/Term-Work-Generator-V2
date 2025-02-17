@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Term Work Generator V2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      background: white;
+      padding: 20px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    #practicals div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .remove-btn {
+      background-color: red;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+
+    .remove-btn:hover {
+      background-color: darkred;
+    }
+
+    .warnings {
+      max-width: 500px;
+      margin: auto;
+      margin-top: 20px;
+      background-color: #fff3cd;
+      padding: 10px;
+      border-radius: 5px;
+      border-left: 5px solid #ffcc00;
+      font-size: 14px;
+      text-align: left;
+    }
+  </style>
+  <script>
+    function addPracticalField() {
+      var container = document.getElementById('practicals');
+      var div = document.createElement('div');
+      div.innerHTML = `
+        <input type="text" name="practicalNumber" placeholder="Practical Number">
+        <input type="text" name="experimentName" placeholder="Experiment Name">
+        <button type="button" class="remove-btn" onclick="removeField(this)">X</button>
+      `;
+      container.appendChild(div);
+    }
+
+    function removeField(button) {
+      button.parentNode.remove();
+    }
+
+    function submitForm() {
+      var formData = {
+        name: document.getElementById('name').value,
+        pen: document.getElementById('pen').value,
+        subject: document.getElementById('subject').value,
+        term: document.getElementById('term').value,
+        semester: document.getElementById('semester').value,
+        className: document.getElementById('className').value,
+        batch: document.getElementById('batch').value,
+        checkedBy: document.getElementById('checkedBy').value,
+        email: document.getElementById('email').value,
+        practicals: []
+      };
+
+      var practicalNumbers = document.getElementsByName('practicalNumber');
+      var experimentNames = document.getElementsByName('experimentName');
+
+      for (var i = 0; i < practicalNumbers.length; i++) {
+        if (practicalNumbers[i].value && experimentNames[i].value) {
+          formData.practicals.push({
+            number: practicalNumbers[i].value,
+            name: experimentNames[i].value
+          });
+        }
+      }
+
+      if (!formData.email) {
+        alert("⚠️ Please enter an email address to receive the PDF.");
+        return;
+      }
+
+      if (formData.practicals.length > 5) {
+        alert("⏳ Generating multiple term works may take more time. Please be patient.");
+      }
+
+      var currentTime = new Date();
+      var hours = currentTime.getHours();
+      var minutes = currentTime.getMinutes();
+      if (hours === 3) {
+        alert("⚠️ The system does not work properly between 3:00 AM - 4:00 AM. Please try later.");
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function() {
+        alert("✅ Your PDF is being generated and will be sent to your email shortly.");
+      }).generatePDF(formData);
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Term Work Generator V2</h2>
+
+    <label>Name:</label>
+    <input type="text" id="name" placeholder="Enter your name">
+
+    <label>PEN:</label>
+    <input type="text" id="pen" placeholder="Enter your PEN">
+
+    <label>Subject:</label>
+    <input type="text" id="subject" placeholder="Enter subject">
+
+    <label>Term:</label>
+    <input type="text" id="term" placeholder="Enter term">
+
+    <label>Semester:</label>
+    <input type="text" id="semester" placeholder="Enter semester">
+
+    <label>Class Name:</label>
+    <input type="text" id="className" placeholder="Enter class name">
+
+    <label>Batch:</label>
+    <input type="text" id="batch" placeholder="Enter batch">
+
+    <label>Checked By:</label>
+    <input type="text" id="checkedBy" placeholder="Checked by">
+
+    <label>Email:</label>
+    <input type="email" id="email" placeholder="Enter your email">
+
+    <label>Practicals:</label>
+    <div id="practicals">
+      <input type="text" name="practicalNumber" placeholder="Practical Number">
+      <input type="text" name="experimentName" placeholder="Experiment Name">
+      <button type="button" onclick="addPracticalField()">➕ Add More</button>
+    </div>
+
+    <button onclick="submitForm()">🚀 Generate PDF</button>
+  </div>
+
+  <div class="warnings">
+    ⚠️ <b>Important Warnings:</b>
+    <ul>
+      <li>You will get your PDF in your Provided <b>Email ID</b> in some time.</li>
+      <li>Generating multiple term works may take <b>more time</b>.</li>
+      <li>Do <b>not</b> use this between <b>3:00 AM - 4:00 AM</b>, as it will <b>not work properly</b>.</li>
+      <li>As the time of <b>3:00 AM - 4:00 AM</b> is when the stored files get <b>Deleted</b> on My-Side.</li>
+      <li><b>Don't keep any field empty</b> as it causes error or blank pdf to be sent</li>
+    </ul>
+  </div>
+</body>
+</html>
