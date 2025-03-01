@@ -102,7 +102,27 @@
       button.parentNode.remove();
     }
 
+    function validateEmail(email) {
+      var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
     function submitForm() {
+      var submitButton = document.getElementById("submitBtn");
+      var inputs = document.querySelectorAll("input");
+      for (var input of inputs) {
+        if (!input.value.trim()) {
+          alert("⚠️ Please fill in all fields before submitting.");
+          return;
+        }
+      }
+
+      var email = document.getElementById('email').value;
+      if (!validateEmail(email)) {
+        alert("⚠️ Please enter a valid email address.");
+        return;
+      }
+
       var formData = {
         name: document.getElementById('name').value,
         pen: document.getElementById('pen').value,
@@ -112,7 +132,7 @@
         className: document.getElementById('className').value,
         batch: document.getElementById('batch').value,
         checkedBy: document.getElementById('checkedBy').value,
-        email: document.getElementById('email').value,
+        email: email,
         practicals: []
       };
 
@@ -128,27 +148,37 @@
         }
       }
 
-      if (!formData.email) {
-        alert("⚠️ Please enter an email address to receive the PDF.");
-        return;
-      }
-
       if (formData.practicals.length > 5) {
         alert("⏳ Generating multiple term works may take more time. Please be patient.");
       }
 
       var currentTime = new Date();
       var hours = currentTime.getHours();
-      var minutes = currentTime.getMinutes();
       if (hours === 3) {
         alert("⚠️ The system does not work properly between 3:00 AM - 4:00 AM. Please try later.");
         return;
       }
 
+      submitButton.disabled = true;
+      submitButton.textContent = "Processing...";
+      submitButton.style.backgroundColor = "#013670";
+      submitButton.style.cursor = "not-allowed";
+      submitButton.setAttribute("data-tooltip", "⏳ Please wait, processing...");
+
       google.script.run.withSuccessHandler(function() {
         alert("✅ Your PDF is being generated and will be sent to your email shortly.");
+        resetSubmitButton();
       }).generatePDF(formData);
     }
+
+    function resetSubmitButton() {
+      var submitButton = document.getElementById("submitBtn");
+      submitButton.disabled = false;
+      submitButton.textContent = "🚀 Generate PDF";
+      submitButton.removeAttribute("style");
+      submitButton.setAttribute("data-tooltip", "Generate and send PDF");
+    }
+
   </script>
 </head>
 <body>
@@ -189,17 +219,15 @@
       <button type="button" onclick="addPracticalField()">➕ Add More</button>
     </div>
 
-    <button onclick="submitForm()">🚀 Generate PDF</button>
+    <button id="submitBtn" onclick="submitForm()">🚀 Generate PDF</button>
   </div>
 
   <div class="warnings">
     ⚠️ <b>Important Warnings:</b>
     <ul>
       <li>You will get your PDF in your Provided <b>Email ID</b> in some time.</li>
-      <li>Generating multiple term works may take <b>more time</b>.</li>
       <li>Do <b>not</b> use this between <b>3:00 AM - 4:00 AM</b>, as it will <b>not work properly</b>.</li>
       <li>As the time of <b>3:00 AM - 4:00 AM</b> is when the stored files get <b>Deleted</b> on My-Side.</li>
-      <li><b>Don't keep any field empty</b> as it causes error or blank pdf to be sent</li>
     </ul>
   </div>
 </body>
